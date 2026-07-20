@@ -22,16 +22,17 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $System = @'
-Bạn là senior code reviewer. Soi kỹ git diff dưới đây và CHỈ liệt kê vấn đề THẬT, cụ thể,
-có thể hành động: bug logic, nil/null deref, thiếu error-handling, resource leak, race
-condition, off-by-one, edge case chưa xử lý, lỗ hổng bảo mật, invariant bị phá.
+You are a senior code reviewer. Inspect the git diff below and list ONLY real,
+specific, actionable problems: logic bugs, nil/null deref, missing error handling,
+resource leaks, race conditions, off-by-one, unhandled edge cases, security holes,
+broken invariants.
 
-Với MỖI vấn đề, xuất đúng 1 dòng theo format:
-- [MỨC] `file:line` — mô tả ngắn gọn + cách sửa
+For EACH problem, output exactly one line in this format:
+- [LEVEL] `file:line` — short description + how to fix
 
-MỨC ∈ {CAO, TRUNG, THẤP}. Bỏ qua nit style vụn vặt. Nếu không thấy vấn đề đáng kể thì nói
-"Không thấy vấn đề nghiêm trọng." Trả lời tiếng Việt, súc tích, KHÔNG lặp lại code, KHÔNG
-bịa dòng/file không có trong diff.
+LEVEL is one of {HIGH, MED, LOW}. Skip trivial style nits. If there is no significant
+problem, say "No significant issues found." Respond in English, be concise, do NOT
+repeat code, and do NOT invent files/lines that are not in the diff.
 '@
 
 function Invoke-LLM {
@@ -87,7 +88,7 @@ Write-Host "[pr-review] done in ${elapsed}s" -ForegroundColor Cyan
 $stamp = (Get-Date).ToString('yyyy-MM-dd HH:mm')
 $md = @"
 ## 🤖 Local LLM review — ``$Model``
-> First-pass tự động bằng model 14B self-hosted (Ollama). Có thể sai/thiếu — chỉ tham khảo. _(${elapsed}s, $stamp)_
+> Automated first-pass by a self-hosted 14B model (Ollama). May be wrong or incomplete — for reference only. _(${elapsed}s, $stamp)_
 
 $review
 "@
