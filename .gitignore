@@ -1,0 +1,12 @@
+# Generated during setup
+Modelfile-review
+Modelfile-deepreview
+
+# Scratch / logs
+*.log
+resp*.txt
+body.json
+
+# Windows cruft
+Thumbs.db
+Desktop.ini
