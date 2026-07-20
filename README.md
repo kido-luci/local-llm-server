@@ -10,7 +10,9 @@ offline, and free.
 | File | Purpose |
 |------|---------|
 | `llm-tools.ps1` | PowerShell helpers: `review-diff`, `gen-test`, `summarize-code`, `deep-review` |
+| `pr-review.ps1` | Review a GitHub PR with a local model and post the result as a PR comment |
 | `ollama-serve.vbs` | Starts the Ollama API server headless at login, bound to the LAN |
+| `run-runner.vbs` | Starts the GitHub Actions self-hosted runner headless at login (for auto PR review) |
 
 ## Models
 
@@ -80,6 +82,21 @@ gen-test .\src\foo.py pytest    # generate unit tests
 summarize-code .\src\foo.py     # explain / summarize a file
 deep-review                     # slower, deeper reasoning review (DeepSeek-R1)
 ```
+
+### GitHub PR review
+
+`pr-review.ps1` fetches a PR's diff via `gh`, reviews it with a local model, and
+either prints the result (dry-run, default) or posts it as a PR comment. Small
+diffs go in one shot; large ones are reviewed per file to fit the 16K context.
+
+```powershell
+.\pr-review.ps1 -Pr 78 -Repo owner/name                    # print review (dry-run)
+.\pr-review.ps1 -Pr 78 -Repo owner/name -Model deepseek-review
+.\pr-review.ps1 -Pr 78 -Repo owner/name -Post              # post as a PR comment
+```
+
+Needs `gh` on PATH and Ollama reachable. This is what the optional self-hosted
+GitHub Actions runner invokes to review every PR automatically.
 
 ### API (OpenAI-compatible)
 
