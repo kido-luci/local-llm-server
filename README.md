@@ -12,7 +12,7 @@ offline, and free.
 | `llm-tools.ps1` | PowerShell helpers: `review-diff`, `gen-test`, `summarize-code`, `deep-review` |
 | `pr-review.ps1` | Review a GitHub PR with a local model and post the result as a PR comment |
 | `ollama-serve.vbs` | Starts the Ollama API server headless at login, bound to the LAN |
-| `run-runner.vbs` | Starts the GitHub Actions self-hosted runner headless at login (for auto PR review) |
+| `install-services.ps1` | Installs Ollama + the PR-review runner as headless Windows services (no login) |
 
 ## Models
 
@@ -70,6 +70,35 @@ Copy-Item ollama-serve.vbs ([Environment]::GetFolderPath('Startup'))
 ```
 
 The VBS sets `OLLAMA_HOST=0.0.0.0:11434` so the API is reachable on your LAN.
+
+### 5. Headless auto PR review (Windows services)
+
+To auto-review every PR *without staying logged in*, run both Ollama and the GitHub
+Actions runner as Windows services. `install-services.ps1` installs both:
+
+- **`OllamaServe`** — Ollama wrapped by [nssm](https://nssm.cc) (LocalSystem, runs on
+  the GPU, `OLLAMA_MODELS` pinned to your models dir).
+- **`actions.runner.*`** — the self-hosted runner, via `config.cmd --runasservice`
+  (runs as `NT AUTHORITY\NETWORK SERVICE`).
+
+Prereqs: unpack the [Actions runner](https://github.com/actions/runner/releases) into
+`D:\actions-runner`, drop `nssm.exe` into `D:\ollama-service`, and have `gh`
+authenticated. Then, in an **elevated** PowerShell:
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; & .\install-services.ps1
+```
+
+The script also sets the machine `ExecutionPolicy` to `RemoteSigned` (so the service
+can run scripts) and grants `NETWORK SERVICE` read access to this repo (so it can run
+`pr-review.ps1`). Both services auto-start at boot — this **replaces** the login
+launcher in step 4. Edit the repo URL / paths near the top of the script for your box.
+
+Manage them:
+
+```powershell
+Get-Service OllamaServe, actions.runner.*   # status (Restart-Service needs admin)
+```
 
 ## Usage
 
