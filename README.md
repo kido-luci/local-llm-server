@@ -12,6 +12,7 @@ offline, and free.
 | `llm-tools.ps1` | PowerShell helpers: `review-diff`, `gen-test`, `summarize-code`, `deep-review` |
 | `pr-review.ps1` | Review a GitHub PR with a local model and post the result as a PR comment |
 | `ollama-serve.vbs` | Starts the Ollama API server headless at login, bound to the LAN |
+| `run-runner.vbs` | Starts the GitHub Actions self-hosted runner headless at login (for auto PR review) |
 
 ## Models
 
