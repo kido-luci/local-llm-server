@@ -67,14 +67,14 @@ $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
 # --- review: single-shot if small, else per-file -------------------------
 if ($diff.Length -le $ChunkThreshold) {
-    $review = Invoke-LLM -UserContent "Git diff cần review:`n`n$diff"
+    $review = Invoke-LLM -UserContent "Git diff to review:`n`n$diff"
 } else {
     $parts = [regex]::Split($diff, '(?m)^(?=diff --git )') | Where-Object { $_.Trim() }
     Write-Host "[pr-review] large diff -> reviewing $($parts.Count) files separately" -ForegroundColor Yellow
     $sections = foreach ($p in $parts) {
         $file = ([regex]::Match($p, 'b/(.+)')).Groups[1].Value.Trim()
         Write-Host "  - $file" -ForegroundColor DarkGray
-        $r = Invoke-LLM -UserContent "Git diff của file ``$file``:`n`n$p"
+        $r = Invoke-LLM -UserContent "Git diff for file ``$file``:`n`n$p"
         "### ``$file```n$r"
     }
     $review = $sections -join "`n`n"
